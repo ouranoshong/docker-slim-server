@@ -10,7 +10,7 @@
 #    https://hub.docker.com/r/laradock/php-fpm/tags/
 #
 
-FROM laradock/php-fpm:7.0--1.2
+FROM laradock/php-fpm:1.4-71
 
 MAINTAINER hong <ouranoshong@outlook.com>
 
@@ -113,8 +113,6 @@ RUN if [ ${INSTALL_OPCACHE} = true ]; then \
 
 ADD ./slim.ini /usr/local/etc/php/conf.d
 ADD ./slim.pool.conf /usr/local/etc/php-fpm.d/
-
-RUN rm -r /var/lib/apt/lists/*
 
 RUN usermod -u 1000 www-data
 

@@ -9,7 +9,7 @@ services:
             context: ./php-fpm
             args:
                 - INSTALL_XDEBUG=false
-                - INSTALL_MONGO=false
+                - INSTALL_MONGO=true
                 - INSTALL_ZIP_ARCHIVE=false
                 - INSTALL_MEMCACHED=false
                 - INSTALL_OPCACHE=true
