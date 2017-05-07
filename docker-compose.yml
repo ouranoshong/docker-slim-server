@@ -2,6 +2,16 @@ version: '2'
 
 services:
 
+### MongoDB Container #######################################
+
+    mongo:
+      build: ./mongo
+      ports:
+        - "27017:27017"
+      volumes_from:
+        - volumes_data
+        
+
 ### PHP-FPM Container #######################################
 
     php-fpm:
@@ -26,6 +36,8 @@ services:
         environment:
             # IMPORTANT: Set the Remote Interpreter entry matching name to `slim`
             - PHP_IDE_CONFIG="serverName=slim.dev"
+        links:
+            - "mongo:local.mongo"
 
 ### Nginx Server Container ##################################
 
@@ -49,7 +61,7 @@ services:
     volumes_source:
         image: tianon/true
         volumes:
-            - ../tokyo:/var/www/slim
+            - ../slim-app:/var/www/slim
 
 ### Databases Data Container ################################
 
