@@ -2,18 +2,34 @@ version: '2'
 
 services:
 
-### MongoDB Container #######################################
+### MySQL Container #######################################
+    mysql:
+        build: ./mysql
+        volumes_from:
+            - volumes_data
+        ports:
+            - "3306:3306"
+        environment:
+            MYSQL_DATABASE: ${MYSQL_DATABASE}
+            MYSQL_USER: ${MYSQL_USER}
+            MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+        networks:
+            - backend
 
+
+### MongoDB Container #######################################
     mongo:
-      build: ./mongo
-      ports:
-        - "27017:27017"
-      volumes_from:
-        - volumes_data
+        build: ./mongo
+        ports:
+            - "27017:27017"
+        volumes_from:
+            - volumes_data
+        networks: 
+            - "backend"
         
 
 ### PHP-FPM Container #######################################
-
     php-fpm:
         build:
             context: ./php-fpm
@@ -36,11 +52,10 @@ services:
         environment:
             # IMPORTANT: Set the Remote Interpreter entry matching name to `slim`
             - PHP_IDE_CONFIG="serverName=slim.dev"
-        links:
-            - "mongo:local.mongo"
+        networks:
+            - "backend"
 
 ### Nginx Server Container ##################################
-
     nginx:
         build:
             context: ./nginx
@@ -53,18 +68,16 @@ services:
         ports:
             - "80:80"
             - "443:443"
-        links:
-            - php-fpm
+        networks:
+            - "backend"
 
 ### Slim3 Application Code Container ######################
-
     volumes_source:
         image: tianon/true
         volumes:
-            - ../slim-app:/var/www/slim
+            - ${PROJECT_DIR}:/var/www/slim
 
 ### Databases Data Container ################################
-
     volumes_data:
         image: tianon/true
         volumes:
@@ -75,3 +88,8 @@ services:
             - ./data/neo4j:/var/lib/neo4j/data
             - ./data/mongo:/data/db
             - ./data/sessions:/sessions
+
+### Networks #############################################
+networks:
+    backend:
+        driver: "bridge"
