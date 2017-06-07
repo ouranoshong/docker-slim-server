@@ -2,11 +2,60 @@ version: '2'
 
 services:
 
+### Applications Code Container #############################
+
+    applications:
+      image: tianon/true
+      volumes:
+        - ${APPLICATION}:/var/www/slim
+
+### Workspace Utilities Container ###########################
+
+    workspace:
+      build:
+        context: ./workspace
+        args:
+          - INSTALL_XDEBUG=${WORKSPACE_INSTALL_XDEBUG}
+          - INSTALL_BLACKFIRE=${INSTALL_BLACKFIRE}
+          - INSTALL_SOAP=${WORKSPACE_INSTALL_SOAP}
+          - INSTALL_MONGO=${WORKSPACE_INSTALL_MONGO}
+          - INSTALL_MSSQL=${WORKSPACE_INSTALL_MSSQL}
+          - INSTALL_NODE=${WORKSPACE_INSTALL_NODE}
+          - INSTALL_YARN=${WORKSPACE_INSTALL_YARN}
+          - INSTALL_DRUSH=${WORKSPACE_INSTALL_DRUSH}
+          - INSTALL_AEROSPIKE=${WORKSPACE_INSTALL_AEROSPIKE}
+          - INSTALL_V8JS=${WORKSPACE_INSTALL_V8JS}
+          - COMPOSER_GLOBAL_INSTALL=${WORKSPACE_COMPOSER_GLOBAL_INSTALL}
+          - INSTALL_WORKSPACE_SSH=${WORKSPACE_INSTALL_WORKSPACE_SSH}
+          - INSTALL_LARAVEL_ENVOY=${WORKSPACE_INSTALL_LARAVEL_ENVOY}
+          - INSTALL_LARAVEL_INSTALLER=${WORKSPACE_INSTALL_LARAVEL_INSTALLER}
+          - INSTALL_DEPLOYER=${WORKSPACE_INSTALL_DEPLOYER}
+          - INSTALL_LINUXBREW=${WORKSPACE_INSTALL_LINUXBREW}
+          - INSTALL_MC=${WORKSPACE_INSTALL_MC}
+          - PUID=${WORKSPACE_PUID}
+          - PGID=${WORKSPACE_PGID}
+          - NODE_VERSION=${WORKSPACE_NODE_VERSION}
+          - YARN_VERSION=${WORKSPACE_YARN_VERSION}
+          - TZ=${WORKSPACE_TIMEZONE}
+          - BLACKFIRE_CLIENT_ID=${BLACKFIRE_CLIENT_ID}
+          - BLACKFIRE_CLIENT_TOKEN=${BLACKFIRE_CLIENT_TOKEN}
+        dockerfile: "Dockerfile-${PHP_VERSION}"
+      volumes_from:
+        - applications
+      extra_hosts:
+        - "dockerhost:${DOCKER_HOST_IP}"
+      ports:
+        - "${WORKSPACE_SSH_PORT}:22"
+      tty: true                                                                                            
+      networks:
+        - frontend
+        - backend
+
 ### MySQL Container #######################################
     mysql:
         build: ./mysql
-        volumes_from:
-            - volumes_data
+        volumes:
+            - ./data/mysql:/var/lib/mysql
         ports:
             - "3306:3306"
         environment:
@@ -17,18 +66,16 @@ services:
         networks:
             - backend
 
-
 ### MongoDB Container #######################################
     mongo:
         build: ./mongo
         ports:
             - "27017:27017"
-        volumes_from:
-            - volumes_data
+        volumes: 
+            - ./data/mongo:/data/db
         networks: 
             - "backend"
         
-
 ### PHP-FPM Container #######################################
     php-fpm:
         build:
@@ -41,17 +88,15 @@ services:
                 - INSTALL_OPCACHE=true
             dockerfile: Dockerfile
         volumes_from:
-            - volumes_source
+            - applications
         expose:
             - "9000"
         extra_hosts:
             # IMPORTANT: Replace with your Docker Host IP (will be appended to /etc/hosts)
-            - "dockerhost:10.0.75.1"
-        ports:
-            - "22:22"
+            - "dockerhost:${DOCKER_HOST_IP}"
         environment:
             # IMPORTANT: Set the Remote Interpreter entry matching name to `slim`
-            - PHP_IDE_CONFIG="serverName=slim.dev"
+            - PHP_IDE_CONFIG=${PHP_IDE_CONFIG}
         networks:
             - "backend"
 
@@ -61,8 +106,9 @@ services:
             context: ./nginx
             args:
                 - PHP_UPSTREAM=php-fpm
+            dockerfile: "Dockerfile"
         volumes_from:
-            - volumes_source
+            - applications
         volumes:
             - ./logs/nginx/:/var/log/nginx
         ports:
@@ -71,25 +117,17 @@ services:
         networks:
             - "backend"
 
-### Slim3 Application Code Container ######################
-    volumes_source:
-        image: tianon/true
-        volumes:
-            - ${PROJECT_DIR}:/var/www/slim
-
-### Databases Data Container ################################
-    volumes_data:
-        image: tianon/true
-        volumes:
-            - ./data/mysql:/var/lib/mysql
-            - ./data/postgres:/var/lib/postgres
-            - ./data/memcached:/var/lib/memcached
-            - ./data/redis:/data
-            - ./data/neo4j:/var/lib/neo4j/data
-            - ./data/mongo:/data/db
-            - ./data/sessions:/sessions
-
 ### Networks #############################################
 networks:
     backend:
         driver: "bridge"
+    frontend:
+        driver: "bridge"
+
+### Volumes Setup #############################################
+
+volumes:
+    mysql:
+        driver: "local"
+    mongo:
+        driver: "local"
