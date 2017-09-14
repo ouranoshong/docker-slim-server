@@ -1,133 +1,144 @@
 version: '2'
-
 services:
-
-### Applications Code Container #############################
-
     applications:
-      image: tianon/true
-      volumes:
-        - ${APPLICATION}:/var/www/slim
-
-### Workspace Utilities Container ###########################
-
+        image: tianon/true
+        volumes:
+            - '${APPLICATION}:/var/www/slim'
     workspace:
-      build:
-        context: ./workspace
-        args:
-          - INSTALL_XDEBUG=${WORKSPACE_INSTALL_XDEBUG}
-          - INSTALL_BLACKFIRE=${INSTALL_BLACKFIRE}
-          - INSTALL_SOAP=${WORKSPACE_INSTALL_SOAP}
-          - INSTALL_MONGO=${WORKSPACE_INSTALL_MONGO}
-          - INSTALL_MSSQL=${WORKSPACE_INSTALL_MSSQL}
-          - INSTALL_NODE=${WORKSPACE_INSTALL_NODE}
-          - INSTALL_YARN=${WORKSPACE_INSTALL_YARN}
-          - INSTALL_DRUSH=${WORKSPACE_INSTALL_DRUSH}
-          - INSTALL_AEROSPIKE=${WORKSPACE_INSTALL_AEROSPIKE}
-          - INSTALL_V8JS=${WORKSPACE_INSTALL_V8JS}
-          - COMPOSER_GLOBAL_INSTALL=${WORKSPACE_COMPOSER_GLOBAL_INSTALL}
-          - INSTALL_WORKSPACE_SSH=${WORKSPACE_INSTALL_WORKSPACE_SSH}
-          - INSTALL_LARAVEL_ENVOY=${WORKSPACE_INSTALL_LARAVEL_ENVOY}
-          - INSTALL_LARAVEL_INSTALLER=${WORKSPACE_INSTALL_LARAVEL_INSTALLER}
-          - INSTALL_DEPLOYER=${WORKSPACE_INSTALL_DEPLOYER}
-          - INSTALL_LINUXBREW=${WORKSPACE_INSTALL_LINUXBREW}
-          - INSTALL_MC=${WORKSPACE_INSTALL_MC}
-          - PUID=${WORKSPACE_PUID}
-          - PGID=${WORKSPACE_PGID}
-          - NODE_VERSION=${WORKSPACE_NODE_VERSION}
-          - YARN_VERSION=${WORKSPACE_YARN_VERSION}
-          - TZ=${WORKSPACE_TIMEZONE}
-          - BLACKFIRE_CLIENT_ID=${BLACKFIRE_CLIENT_ID}
-          - BLACKFIRE_CLIENT_TOKEN=${BLACKFIRE_CLIENT_TOKEN}
-        dockerfile: "Dockerfile-${PHP_VERSION}"
-      volumes_from:
-        - applications
-      extra_hosts:
-        - "dockerhost:${DOCKER_HOST_IP}"
-      ports:
-        - "${WORKSPACE_SSH_PORT}:22"
-      tty: true                                                                                            
-      networks:
-        - frontend
-        - backend
-
-### MySQL Container #######################################
+        build:
+            context: ./workspace
+            args:
+                - 'INSTALL_XDEBUG=${WORKSPACE_INSTALL_XDEBUG}'
+                - 'INSTALL_BLACKFIRE=${INSTALL_BLACKFIRE}'
+                - 'INSTALL_SOAP=${WORKSPACE_INSTALL_SOAP}'
+                - 'INSTALL_MONGO=${WORKSPACE_INSTALL_MONGO}'
+                - 'INSTALL_MSSQL=${WORKSPACE_INSTALL_MSSQL}'
+                - 'INSTALL_NODE=${WORKSPACE_INSTALL_NODE}'
+                - 'INSTALL_YARN=${WORKSPACE_INSTALL_YARN}'
+                - 'INSTALL_DRUSH=${WORKSPACE_INSTALL_DRUSH}'
+                - 'INSTALL_AEROSPIKE=${WORKSPACE_INSTALL_AEROSPIKE}'
+                - 'INSTALL_V8JS=${WORKSPACE_INSTALL_V8JS}'
+                - 'COMPOSER_GLOBAL_INSTALL=${WORKSPACE_COMPOSER_GLOBAL_INSTALL}'
+                - 'INSTALL_WORKSPACE_SSH=${WORKSPACE_INSTALL_WORKSPACE_SSH}'
+                - 'INSTALL_LARAVEL_ENVOY=${WORKSPACE_INSTALL_LARAVEL_ENVOY}'
+                - 'INSTALL_LARAVEL_INSTALLER=${WORKSPACE_INSTALL_LARAVEL_INSTALLER}'
+                - 'INSTALL_DEPLOYER=${WORKSPACE_INSTALL_DEPLOYER}'
+                - 'INSTALL_LINUXBREW=${WORKSPACE_INSTALL_LINUXBREW}'
+                - 'INSTALL_MC=${WORKSPACE_INSTALL_MC}'
+                - 'PUID=${WORKSPACE_PUID}'
+                - 'PGID=${WORKSPACE_PGID}'
+                - 'NODE_VERSION=${WORKSPACE_NODE_VERSION}'
+                - 'YARN_VERSION=${WORKSPACE_YARN_VERSION}'
+                - 'TZ=${WORKSPACE_TIMEZONE}'
+                - 'BLACKFIRE_CLIENT_ID=${BLACKFIRE_CLIENT_ID}'
+                - 'BLACKFIRE_CLIENT_TOKEN=${BLACKFIRE_CLIENT_TOKEN}'
+            dockerfile: 'Dockerfile-${PHP_VERSION}'
+        volumes_from:
+            - applications
+        extra_hosts:
+            - 'dockerhost:${DOCKER_HOST_IP}'
+        ports:
+            - '${WORKSPACE_SSH_PORT}:22'
+        tty: true
+        networks:
+            - frontend
+            - backend
     mysql:
         build: ./mysql
         volumes:
-            - ./data/mysql:/var/lib/mysql
+            - './data/mysql:/var/lib/mysql'
         ports:
-            - "3306:3306"
+            - '3306:3306'
         environment:
-            MYSQL_DATABASE: ${MYSQL_DATABASE}
-            MYSQL_USER: ${MYSQL_USER}
-            MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+            MYSQL_DATABASE: '${MYSQL_DATABASE}'
+            MYSQL_USER: '${MYSQL_USER}'
+            MYSQL_PASSWORD: '${MYSQL_PASSWORD}'
+            MYSQL_ROOT_PASSWORD: '${MYSQL_ROOT_PASSWORD}'
         networks:
             - backend
-
-### MongoDB Container #######################################
     mongo:
         build: ./mongo
         ports:
-            - "27017:27017"
-        volumes: 
-            - ./data/mongo:/data/db
-        networks: 
-            - "backend"
-        
-### PHP-FPM Container #######################################
+            - '27017:27017'
+        volumes:
+            - './data/mongo:/data/db'
+        networks:
+            - backend
     php-fpm:
         build:
             context: ./php-fpm
             args:
-                - INSTALL_XDEBUG=false
-                - INSTALL_MONGO=true
-                - INSTALL_ZIP_ARCHIVE=false
-                - INSTALL_MEMCACHED=false
-                - INSTALL_OPCACHE=true
+                - INSTALL_XDEBUG=${PHPFPM_INSTALL_XDEBUG}
+                - INSTALL_MONGO=${PHPFPM_INSTALL_MONGO}
+                - INSTALL_ZIP_ARCHIVE=${PHPFPM_INSTALL_ZIP_ARCHIVE}
+                - INSTALL_MEMCACHED=${PHPFPM_INSTALL_MEMCACHED}
+                - INSTALL_OPCACHE=${PHPFPM_INSTALL_OPCACHE}
             dockerfile: Dockerfile
         volumes_from:
             - applications
+        volumes:
+            - './logs/xdebug/:/var/www/xdebug'
         expose:
-            - "9000"
+            - '9000'
         extra_hosts:
-            # IMPORTANT: Replace with your Docker Host IP (will be appended to /etc/hosts)
-            - "dockerhost:${DOCKER_HOST_IP}"
+            - 'dockerhost:${DOCKER_HOST_IP}'
         environment:
-            # IMPORTANT: Set the Remote Interpreter entry matching name to `slim`
-            - PHP_IDE_CONFIG=${PHP_IDE_CONFIG}
+            - 'PHP_IDE_CONFIG=${PHP_IDE_CONFIG}'
         networks:
-            - "backend"
-
-### Nginx Server Container ##################################
+            - backend
     nginx:
         build:
             context: ./nginx
             args:
                 - PHP_UPSTREAM=php-fpm
-            dockerfile: "Dockerfile"
+            dockerfile: Dockerfile
         volumes_from:
             - applications
         volumes:
-            - ./logs/nginx/:/var/log/nginx
+            - './logs/nginx/:/var/log/nginx'
         ports:
-            - "80:80"
-            - "443:443"
+            - '80:80'
+            - '443:443'
         networks:
-            - "backend"
-
-### Networks #############################################
+            - backend
+    elasticsearch:
+        build: ./elasticsearch
+        volumes:
+            - './data/elasticsearch:/usr/share/elasticsearch/data'
+            - './elasticsearch/plugins:/usr/share/elasticsearch/plugins'
+        environment:
+            - cluster.name=slim
+            - bootstrap.memory_lock=true
+            - ES_JAVA_OPTS=-Xms256m -Xmx256m
+        ulimits:
+            memlock:
+                soft: -1
+                hard: -1
+        mem_limit: 512m
+        ports:
+            - '${ELASTICSEARCH_HOST_HTTP_PORT}:9200'
+            - '${ELASTICSEARCH_HOST_TRANSPORT_PORT}:9300'
+        networks:
+            - frontend
+            - backend
+    kibana:
+        build: ./kibana
+        ports:
+            - '${KIBANA_HTTP_PORT}:5601'
+        depends_on:
+            - elasticsearch
+        networks:
+            - frontend
+            - backend
 networks:
     backend:
-        driver: "bridge"
+        driver: bridge
     frontend:
-        driver: "bridge"
-
-### Volumes Setup #############################################
-
+        driver: bridge
 volumes:
     mysql:
-        driver: "local"
+        driver: local
     mongo:
-        driver: "local"
+        driver: local
+    elasticsearch:
+        driver: local
