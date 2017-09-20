@@ -68,6 +68,7 @@ services:
         build:
             context: ./php-fpm
             args:
+                - INSTALL_IMAGICK=${PHPFPM_INSTALL_IMAGICK}
                 - INSTALL_XDEBUG=${PHPFPM_INSTALL_XDEBUG}
                 - INSTALL_MONGO=${PHPFPM_INSTALL_MONGO}
                 - INSTALL_ZIP_ARCHIVE=${PHPFPM_INSTALL_ZIP_ARCHIVE}

@@ -103,7 +103,19 @@ RUN if [ ${INSTALL_OPCACHE} = true ]; then \
     docker-php-ext-enable opcache \
 ;fi
 
-
+#####################################
+# Imagick:
+#####################################
+ARG INSTALL_IMAGICK=true
+RUN if [ ${INSTALL_IMAGICK} = true ]; then \
+    apt-get update \
+    && apt-get -y install \
+            libmagickwand-dev \
+        --no-install-recommends \
+    && pecl install imagick \
+    && docker-php-ext-enable imagick \
+    && rm -r /var/lib/apt/lists/* \
+;fi
 
 #
 #--------------------------------------------------------------------------
