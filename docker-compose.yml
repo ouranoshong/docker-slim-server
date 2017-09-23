@@ -98,8 +98,8 @@ services:
         volumes:
             - './logs/nginx/:/var/log/nginx'
         ports:
-            - 'NGINX_HTTP_PORT:80'
-            - 'NGINX_HTTPS_PORT:443'
+            - '${NGINX_HTTP_PORT}:80'
+            - '${NGINX_HTTPS_PORT}:443'
         networks:
             - backend
     elasticsearch:
@@ -131,6 +131,17 @@ services:
         networks:
             - frontend
             - backend
+            
+### Redis Container #########################################
+    redis:
+        build: ./redis
+        volumes:
+            - ./data/redis:/data
+        ports:
+            - "${REDIS_PORT}:6379"
+        networks:
+            - backend
+            
 networks:
     backend:
         driver: bridge
