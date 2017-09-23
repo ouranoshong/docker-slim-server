@@ -50,6 +50,16 @@ RUN if [ ${INSTALL_XDEBUG} = true ]; then \
 # Copy xdebug configration for remote debugging
 COPY ./xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
 
+
+ARG INSTALL_APCU=true
+RUN if [ ${INSTALL_APCU} = true ]; then \
+    # Install the apcu extension
+    pecl install APCu && \
+    docker-php-ext-enable apcu \
+;fi
+
+COPY ./apcu.ini /usr/local/etc/php/conf.d/apcu.ini
+
 #####################################
 # MongoDB:
 #####################################
