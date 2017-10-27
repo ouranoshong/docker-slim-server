@@ -42,7 +42,6 @@ MAINTAINER hong <ouranoshong@outlook.com>
 
 ARG INSTALL_XDEBUG=true
 RUN if [ ${INSTALL_XDEBUG} = true ]; then \
-    # Install the xdebug extension
     pecl install xdebug && \
     docker-php-ext-enable xdebug \
 ;fi
@@ -53,7 +52,6 @@ COPY ./xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
 
 ARG INSTALL_APCU=true
 RUN if [ ${INSTALL_APCU} = true ]; then \
-    # Install the apcu extension
     pecl install APCu && \
     docker-php-ext-enable apcu \
 ;fi
@@ -66,7 +64,6 @@ COPY ./apcu.ini /usr/local/etc/php/conf.d/apcu.ini
 
 ARG INSTALL_MONGO=true
 RUN if [ ${INSTALL_MONGO} = true ]; then \
-    # Install the mongodb extension
     pecl install mongodb && \
     docker-php-ext-enable mongodb \
 ;fi
@@ -77,7 +74,6 @@ RUN if [ ${INSTALL_MONGO} = true ]; then \
 
 ARG INSTALL_ZIP_ARCHIVE=true
 RUN if [ ${INSTALL_ZIP_ARCHIVE} = true ]; then \
-    # Install the zip extension
     pecl install zip && \
     docker-php-ext-enable zip \
 ;fi
@@ -88,7 +84,6 @@ RUN if [ ${INSTALL_ZIP_ARCHIVE} = true ]; then \
 
 ARG INSTALL_MEMCACHED=true
 RUN if [ ${INSTALL_MEMCACHED} = true ]; then \
-    # Install the php memcached extension
     curl -L -o /tmp/memcached.tar.gz "https://github.com/php-memcached-dev/php-memcached/archive/php7.tar.gz" \
     && mkdir -p memcached \
     && tar -C memcached -zxvf /tmp/memcached.tar.gz --strip 1 \
