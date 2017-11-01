@@ -108,6 +108,8 @@ RUN if [ ${INSTALL_OPCACHE} = true ]; then \
     docker-php-ext-enable opcache \
 ;fi
 
+COPY ./opcache.ini /usr/local/etc/php/conf.d/opcache.ini
+
 #####################################
 # Imagick:
 #####################################
