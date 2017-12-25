@@ -150,6 +150,7 @@ services:
         build: ./chrome-vnc
         ports:
             - "${CHROME_VNC_PORT}:4444"
+        shm_size: '2gb'
         networks: 
             - backend
             
