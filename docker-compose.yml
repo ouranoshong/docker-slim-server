@@ -62,6 +62,7 @@ services:
             - '27017:27017'
         volumes:
             - './data/mongo:/data/db'
+            - './data/raw:/data/raw'
         networks:
             - backend
     php-fpm:
@@ -108,6 +109,7 @@ services:
         volumes:
             - './data/elasticsearch:/usr/share/elasticsearch/data'
             - './elasticsearch/plugins:/usr/share/elasticsearch/plugins'
+            - './elasticsearch/config:/usr/share/elasticsearch/config'
         environment:
             - cluster.name=slim
             - bootstrap.memory_lock=true
@@ -141,6 +143,14 @@ services:
         ports:
             - "${REDIS_PORT}:6379"
         networks:
+            - backend
+
+### Chrome VNC ##############################################
+    chrome-vnc:
+        build: ./chrome-vnc
+        ports:
+            - "${CHROME_VNC_PORT}:4444"
+        networks: 
             - backend
             
 networks:
