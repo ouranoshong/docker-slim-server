@@ -10,7 +10,7 @@
 #    https://hub.docker.com/r/laradock/php-fpm/tags/
 #
 
-FROM laradock/php-fpm:1.4-71
+FROM laradock/php-fpm:2.0-71
 
 MAINTAINER hong <ouranoshong@outlook.com>
 
@@ -39,18 +39,18 @@ MAINTAINER hong <ouranoshong@outlook.com>
 #####################################
 # xDebug:
 #####################################
-
-ARG INSTALL_XDEBUG=true
+ARG INSTALL_XDEBUG=false
 RUN if [ ${INSTALL_XDEBUG} = true ]; then \
     pecl install xdebug && \
     docker-php-ext-enable xdebug \
 ;fi
 
-# Copy xdebug configration for remote debugging
 COPY ./xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
 
-
-ARG INSTALL_APCU=true
+#####################################
+# APCU:
+#####################################
+ARG INSTALL_APCU=false
 RUN if [ ${INSTALL_APCU} = true ]; then \
     pecl install APCu && \
     docker-php-ext-enable apcu \
@@ -61,8 +61,7 @@ COPY ./apcu.ini /usr/local/etc/php/conf.d/apcu.ini
 #####################################
 # MongoDB:
 #####################################
-
-ARG INSTALL_MONGO=true
+ARG INSTALL_MONGO=false
 RUN if [ ${INSTALL_MONGO} = true ]; then \
     pecl install mongodb && \
     docker-php-ext-enable mongodb \
@@ -71,38 +70,15 @@ RUN if [ ${INSTALL_MONGO} = true ]; then \
 #####################################
 # ZipArchive:
 #####################################
-
-ARG INSTALL_ZIP_ARCHIVE=true
+ARG INSTALL_ZIP_ARCHIVE=false
 RUN if [ ${INSTALL_ZIP_ARCHIVE} = true ]; then \
-    pecl install zip && \
-    docker-php-ext-enable zip \
-;fi
-
-#####################################
-# PHP Memcached:
-#####################################
-
-ARG INSTALL_MEMCACHED=true
-RUN if [ ${INSTALL_MEMCACHED} = true ]; then \
-    curl -L -o /tmp/memcached.tar.gz "https://github.com/php-memcached-dev/php-memcached/archive/php7.tar.gz" \
-    && mkdir -p memcached \
-    && tar -C memcached -zxvf /tmp/memcached.tar.gz --strip 1 \
-    && ( \
-        cd memcached \
-        && phpize \
-        && ./configure \
-        && make -j$(nproc) \
-        && make install \
-    ) \
-    && rm -r memcached \
-    && rm /tmp/memcached.tar.gz \
-    && docker-php-ext-enable memcached \
+    docker-php-ext-install zip \
 ;fi
 
 #####################################
 # Opcache:
 #####################################
-ARG INSTALL_OPCACHE=true
+ARG INSTALL_OPCACHE=false
 RUN if [ ${INSTALL_OPCACHE} = true ]; then \
     docker-php-ext-install opcache && \
     docker-php-ext-enable opcache \
@@ -111,17 +87,16 @@ RUN if [ ${INSTALL_OPCACHE} = true ]; then \
 COPY ./opcache.ini /usr/local/etc/php/conf.d/opcache.ini
 
 #####################################
-# Imagick:
+# ImageMagick:
 #####################################
-ARG INSTALL_IMAGICK=true
-RUN if [ ${INSTALL_IMAGICK} = true ]; then \
-    apt-get update \
-    && apt-get -y install \
-            libmagickwand-dev \
-        --no-install-recommends \
-    && pecl install imagick \
-    && docker-php-ext-enable imagick \
-    && rm -r /var/lib/apt/lists/* \
+USER root
+ARG INSTALL_IMAGEMAGICK=false
+RUN if [ ${INSTALL_IMAGEMAGICK} = true ]; then \
+    apt-get update -y && \
+    apt-get install -y libmagickwand-dev imagemagick && \
+    apt-get clean && \
+    pecl install imagick && \
+    docker-php-ext-enable imagick \
 ;fi
 
 #

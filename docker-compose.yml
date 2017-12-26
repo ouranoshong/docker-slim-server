@@ -70,11 +70,10 @@ services:
             context: ./php-fpm
             args:
                 - INSTALL_APCU=${PHPFPM_INSTALL_APCU}
-                - INSTALL_IMAGICK=${PHPFPM_INSTALL_IMAGICK}
+                - INSTALL_IMAGEMAGICK=${PHPFPM_INSTALL_IMAGICK}
                 - INSTALL_XDEBUG=${PHPFPM_INSTALL_XDEBUG}
                 - INSTALL_MONGO=${PHPFPM_INSTALL_MONGO}
                 - INSTALL_ZIP_ARCHIVE=${PHPFPM_INSTALL_ZIP_ARCHIVE}
-                - INSTALL_MEMCACHED=${PHPFPM_INSTALL_MEMCACHED}
                 - INSTALL_OPCACHE=${PHPFPM_INSTALL_OPCACHE}
             dockerfile: Dockerfile
         volumes_from:
