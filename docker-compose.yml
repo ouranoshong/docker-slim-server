@@ -4,6 +4,7 @@ services:
         image: tianon/true
         volumes:
             - '${APPLICATION}:/var/www/slim'
+            - '${APPLICATION}/supervisor/conf.d:/etc/supervisor/conf.d'
     workspace:
         build:
             context: ./workspace
@@ -152,6 +153,18 @@ services:
         shm_size: '2gb'
         networks: 
             - backend
+
+### PHP Worker ##############################################
+    php-worker:
+        build:             
+            context: ./php-worker
+            args:
+                - INSTALL_MONGO=${PHPFPM_INSTALL_MONGO}
+            dockerfile: Dockerfile
+        networks: 
+            - backend
+        volumes_from:
+            - applications
             
 networks:
     backend:
