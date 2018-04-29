@@ -42,6 +42,7 @@ services:
       build:
         context: ./workspace
         args:
+          - PHP_VERSION=${PHP_VERSION}
           - INSTALL_XDEBUG=${WORKSPACE_INSTALL_XDEBUG}
           - INSTALL_MONGO=${WORKSPACE_INSTALL_MONGO}
           - COMPOSER_GLOBAL_INSTALL=${WORKSPACE_COMPOSER_GLOBAL_INSTALL}
