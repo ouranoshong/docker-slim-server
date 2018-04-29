@@ -22,7 +22,8 @@ RUN apk --update add wget \
 # RUN docker-php-ext-install mysqli mbstring pdo pdo_mysql tokenizer xml
 # RUN pecl channel-update pecl.php.net && pecl install memcached mcrypt-1.0.1 && docker-php-ext-enable memcached
 
-RUN docker-php-ext-install mbstring tokenizer xml mcrypt-1.0.1
+RUN docker-php-ext-install mbstring tokenizer xml
+RUN pecl channel-update pecl.php.net && pecl install mcrypt-1.0.1
 
 #####################################
 # MongoDB:
