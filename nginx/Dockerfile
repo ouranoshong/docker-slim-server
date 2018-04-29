@@ -1,16 +1,24 @@
 FROM nginx:alpine
 
-MAINTAINER hong <ouranoshong@outlook.com>
+LABEL maintainer="hong <ouranoshong@outlook.com>"
 
-COPY certs/* /etc/nginx/certs/
 COPY nginx.conf /etc/nginx/
-COPY sites/*.conf /etc/nginx/sites-available/
 
-ARG PHP_UPSTREAM=php-fpm
+# If you're in China, or you need to change sources, will be set CHANGE_SOURCE to true in .env.
 
-RUN adduser -D -H -u 1000 -s /bin/bash www-data \
-    && rm /etc/nginx/conf.d/default.conf \
-    && echo "upstream php-upstream { server ${PHP_UPSTREAM}:9000; }" > /etc/nginx/conf.d/upstream.conf
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/' /etc/apk/repositories
+
+RUN apk update \
+    && apk upgrade \
+    && apk add --no-cache bash \
+    && adduser -D -H -u 1000 -s /bin/bash www-data
+
+ARG PHP_UPSTREAM_CONTAINER=php-fpm
+ARG PHP_UPSTREAM_PORT=9000
+
+# Set upstream conf and remove the default conf
+RUN echo "upstream php-upstream { server ${PHP_UPSTREAM_CONTAINER}:${PHP_UPSTREAM_PORT}; }" > /etc/nginx/conf.d/upstream.conf \
+    && rm /etc/nginx/conf.d/default.conf
 
 CMD ["nginx"]
 

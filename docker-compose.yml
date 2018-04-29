@@ -1,71 +1,5 @@
-version: '2'
+version: '3'
 services:
-    applications:
-        image: tianon/true
-        volumes:
-            - '${APPLICATION}:/var/www/slim'
-            - '${APPLICATION}/supervisor/conf.d:/etc/supervisor/conf.d'
-    workspace:
-        build:
-            context: ./workspace
-            args:
-                - 'INSTALL_XDEBUG=${WORKSPACE_INSTALL_XDEBUG}'
-                - 'INSTALL_BLACKFIRE=${INSTALL_BLACKFIRE}'
-                - 'INSTALL_SOAP=${WORKSPACE_INSTALL_SOAP}'
-                - 'INSTALL_MONGO=${WORKSPACE_INSTALL_MONGO}'
-                - 'INSTALL_MSSQL=${WORKSPACE_INSTALL_MSSQL}'
-                - 'INSTALL_NODE=${WORKSPACE_INSTALL_NODE}'
-                - 'INSTALL_YARN=${WORKSPACE_INSTALL_YARN}'
-                - 'INSTALL_DRUSH=${WORKSPACE_INSTALL_DRUSH}'
-                - 'INSTALL_AEROSPIKE=${WORKSPACE_INSTALL_AEROSPIKE}'
-                - 'INSTALL_V8JS=${WORKSPACE_INSTALL_V8JS}'
-                - 'COMPOSER_GLOBAL_INSTALL=${WORKSPACE_COMPOSER_GLOBAL_INSTALL}'
-                - 'INSTALL_WORKSPACE_SSH=${WORKSPACE_INSTALL_WORKSPACE_SSH}'
-                - 'INSTALL_LARAVEL_ENVOY=${WORKSPACE_INSTALL_LARAVEL_ENVOY}'
-                - 'INSTALL_LARAVEL_INSTALLER=${WORKSPACE_INSTALL_LARAVEL_INSTALLER}'
-                - 'INSTALL_DEPLOYER=${WORKSPACE_INSTALL_DEPLOYER}'
-                - 'INSTALL_LINUXBREW=${WORKSPACE_INSTALL_LINUXBREW}'
-                - 'INSTALL_MC=${WORKSPACE_INSTALL_MC}'
-                - 'PUID=${WORKSPACE_PUID}'
-                - 'PGID=${WORKSPACE_PGID}'
-                - 'NODE_VERSION=${WORKSPACE_NODE_VERSION}'
-                - 'YARN_VERSION=${WORKSPACE_YARN_VERSION}'
-                - 'TZ=${WORKSPACE_TIMEZONE}'
-                - 'BLACKFIRE_CLIENT_ID=${BLACKFIRE_CLIENT_ID}'
-                - 'BLACKFIRE_CLIENT_TOKEN=${BLACKFIRE_CLIENT_TOKEN}'
-            dockerfile: 'Dockerfile-${PHP_VERSION}'
-        volumes_from:
-            - applications
-        extra_hosts:
-            - 'dockerhost:${DOCKER_HOST_IP}'
-        ports:
-            - '${WORKSPACE_SSH_PORT}:22'
-        tty: true
-        networks:
-            - frontend
-            - backend
-    mysql:
-        build: ./mysql
-        volumes:
-            - './data/mysql:/var/lib/mysql'
-        ports:
-            - '3306:3306'
-        environment:
-            MYSQL_DATABASE: '${MYSQL_DATABASE}'
-            MYSQL_USER: '${MYSQL_USER}'
-            MYSQL_PASSWORD: '${MYSQL_PASSWORD}'
-            MYSQL_ROOT_PASSWORD: '${MYSQL_ROOT_PASSWORD}'
-        networks:
-            - backend
-    mongo:
-        build: ./mongo
-        ports:
-            - '27017:27017'
-        volumes:
-            - './data/mongo:/data/db'
-            - './data/raw:/data/raw'
-        networks:
-            - backend
     php-fpm:
         build:
             context: ./php-fpm
@@ -77,10 +11,9 @@ services:
                 - INSTALL_ZIP_ARCHIVE=${PHPFPM_INSTALL_ZIP_ARCHIVE}
                 - INSTALL_OPCACHE=${PHPFPM_INSTALL_OPCACHE}
             dockerfile: Dockerfile
-        volumes_from:
-            - applications
         volumes:
             - './logs/xdebug/:/var/www/xdebug'
+            - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}
         expose:
             - '9000'
         extra_hosts:
@@ -95,86 +28,15 @@ services:
             args:
                 - PHP_UPSTREAM=php-fpm
             dockerfile: Dockerfile
-        volumes_from:
-            - applications
         volumes:
             - './logs/nginx/:/var/log/nginx'
+            - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}
         ports:
             - '${NGINX_HTTP_PORT}:80'
             - '${NGINX_HTTPS_PORT}:443'
         networks:
             - backend
-    elasticsearch:
-        build: ./elasticsearch
-        volumes:
-            - './data/elasticsearch:/usr/share/elasticsearch/data'
-            - './elasticsearch/plugins:/usr/share/elasticsearch/plugins'
-            - './elasticsearch/config:/usr/share/elasticsearch/config'
-        environment:
-            - cluster.name=slim
-            - bootstrap.memory_lock=true
-            - ES_JAVA_OPTS=-Xms256m -Xmx256m
-        ulimits:
-            memlock:
-                soft: -1
-                hard: -1
-        mem_limit: 512m
-        ports:
-            - '${ELASTICSEARCH_HOST_HTTP_PORT}:9200'
-            - '${ELASTICSEARCH_HOST_TRANSPORT_PORT}:9300'
-        networks:
-            - frontend
-            - backend
-    kibana:
-        build: ./kibana
-        ports:
-            - '${KIBANA_HTTP_PORT}:5601'
-        depends_on:
-            - elasticsearch
-        networks:
-            - frontend
-            - backend
-            
-### Redis Container #########################################
-    redis:
-        build: ./redis
-        volumes:
-            - ./data/redis:/data
-        ports:
-            - "${REDIS_PORT}:6379"
-        networks:
-            - backend
-
-### Chrome VNC ##############################################
-    chrome-vnc:
-        build: ./chrome-vnc
-        ports:
-            - "${CHROME_VNC_PORT}:4444"
-        shm_size: '2gb'
-        networks: 
-            - backend
-
-### PHP Worker ##############################################
-    php-worker:
-        build:             
-            context: ./php-worker
-            args:
-                - INSTALL_MONGO=${PHPFPM_INSTALL_MONGO}
-            dockerfile: Dockerfile
-        networks: 
-            - backend
-        volumes_from:
-            - applications
             
 networks:
     backend:
         driver: bridge
-    frontend:
-        driver: bridge
-volumes:
-    mysql:
-        driver: local
-    mongo:
-        driver: local
-    elasticsearch:
-        driver: local
