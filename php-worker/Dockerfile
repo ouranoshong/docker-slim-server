@@ -4,6 +4,8 @@ FROM php:${PHP_VERSION}-alpine
 
 LABEL maintainer="hong <ouranoshong@outlook.com"
 
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/' /etc/apk/repositories
+
 RUN apk --update add wget \
   curl \
   git \
