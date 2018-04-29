@@ -1,29 +1,71 @@
-#
-#--------------------------------------------------------------------------
-# Image Setup
-#--------------------------------------------------------------------------
-#
 
-FROM laradock/workspace:2.0-71
+ARG PHP_VERSION=${PHP_VERSION}
+FROM php:${PHP_VERSION}-alpine
 
-MAINTAINER ouranoshong <ouranoshong@outlook.com>
+LABEL maintainer="hong <ouranoshong@outlook.com"
 
+RUN apk --update add wget \
+  curl \
+  git \
+  build-base \
+  libmemcached-dev \
+  libmcrypt-dev \
+  libxml2-dev \
+  zlib-dev \
+  autoconf \
+  cyrus-sasl-dev \
+  libgsasl-dev \
+  supervisor
 
-RUN apt-get update -qyy && \
-    apt-get install -qyy supervisor
+# RUN docker-php-ext-install mysqli mbstring pdo pdo_mysql tokenizer xml
+# RUN pecl channel-update pecl.php.net && pecl install memcached mcrypt-1.0.1 && docker-php-ext-enable memcached
+
+RUN docker-php-ext-install mbstring tokenizer xml mcrypt-1.0.1
 
 #####################################
 # MongoDB:
 #####################################
-
-# Check if Mongo needs to be installed
 ARG INSTALL_MONGO=false
-ENV INSTALL_MONGO ${INSTALL_MONGO}
 RUN if [ ${INSTALL_MONGO} = true ]; then \
     pecl install mongodb && \
-    echo "extension=mongodb.so" >> /etc/php/7.1/mods-available/mongodb.ini && \
-    ln -s /etc/php/7.1/mods-available/mongodb.ini /etc/php/7.1/cli/conf.d/30-mongodb.ini \
+    docker-php-ext-enable mongodb \
 ;fi
+
+#####################################
+# ZipArchive:
+#####################################
+ARG INSTALL_ZIP_ARCHIVE=false
+RUN if [ ${INSTALL_ZIP_ARCHIVE} = true ]; then \
+    docker-php-ext-install zip \
+;fi
+
+#####################################
+# Opcache:
+#####################################
+ARG INSTALL_OPCACHE=false
+RUN if [ ${INSTALL_OPCACHE} = true ]; then \
+    docker-php-ext-install opcache && \
+    docker-php-ext-enable opcache \
+;fi
+
+COPY ./opcache.ini /usr/local/etc/php/conf.d/opcache.ini
+
+#####################################
+# ImageMagick:
+#####################################
+USER root
+ARG INSTALL_IMAGEMAGICK=false
+RUN if [ ${INSTALL_IMAGEMAGICK} = true ]; then \
+    apt-get update -y && \
+    apt-get install -y libmagickwand-dev imagemagick && \
+    apt-get clean && \
+    pecl install imagick && \
+    docker-php-ext-enable imagick \
+;fi
+
+
+RUN rm /var/cache/apk/* \
+    && mkdir -p /var/www
 
 #
 #--------------------------------------------------------------------------
@@ -33,10 +75,6 @@ RUN if [ ${INSTALL_MONGO} = true ]; then \
 # Modify the ./supervisor.conf file to match your App's requirements.
 # Make sure you rebuild your container with every change.
 #
-
-USER root
-RUN apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 COPY supervisord.conf /etc/supervisord.conf
 
@@ -51,6 +89,13 @@ ENTRYPOINT ["/usr/bin/supervisord", "-n", "-c",  "/etc/supervisord.conf"]
 #
     # -- Your awesome modifications go here -- #
 
+#
+#--------------------------------------------------------------------------
+# Check PHP version
+#--------------------------------------------------------------------------
+#
+
+RUN php -v | head -n 1 | grep -q "PHP ${PHP_VERSION}."
 
 #
 #--------------------------------------------------------------------------
@@ -58,4 +103,4 @@ ENTRYPOINT ["/usr/bin/supervisord", "-n", "-c",  "/etc/supervisord.conf"]
 #--------------------------------------------------------------------------
 #
 
-WORKDIR /var/www/slim/
+WORKDIR /etc/supervisor/conf.d/

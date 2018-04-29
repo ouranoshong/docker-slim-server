@@ -12,7 +12,9 @@
 # Note: Base Image name format {image-tag}-{php-version}
 #
 
-FROM laradock/workspace:2.2-7.2
+
+ARG PHP_VERSION=${PHP_VERSION}
+FROM laradock/workspace:2.2-${PHP_VERSION}}
 
 LABEL maintainer="hong <ouranoshong@outlook.com>"
 
