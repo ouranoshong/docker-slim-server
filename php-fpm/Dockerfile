@@ -11,7 +11,8 @@
 #
 
 ARG PHP_VERSION=${PHP_VERSION}
-FROM laradock/php-fpm:2.2-${7.2}
+
+FROM laradock/php-fpm:2.2-${PHP_VERSION}
 
 LABEL maintainer="hong <ouranoshong@outlook.com>" 
 
