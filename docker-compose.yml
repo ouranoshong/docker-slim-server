@@ -5,12 +5,7 @@ services:
             context: ./php-fpm
             args:
                 - PHP_VERSION=${PHP_VERSION}
-                - INSTALL_APCU=${PHPFPM_INSTALL_APCU}
-                - INSTALL_IMAGEMAGICK=${PHPFPM_INSTALL_IMAGICK}
                 - INSTALL_XDEBUG=${PHPFPM_INSTALL_XDEBUG}
-                - INSTALL_MONGO=${PHPFPM_INSTALL_MONGO}
-                - INSTALL_ZIP_ARCHIVE=${PHPFPM_INSTALL_ZIP_ARCHIVE}
-                - INSTALL_OPCACHE=${PHPFPM_INSTALL_OPCACHE}
             dockerfile: Dockerfile
         volumes:
             - './logs/xdebug/:/var/www/xdebug'
