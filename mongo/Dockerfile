@@ -1,6 +1,6 @@
 FROM mongo:latest
 
-MAINTAINER hong <ouranoshong@outlook.com>
+LABEL mantainer="hong <ouranoshong@outlook.com>"
 
 EXPOSE 27017
 
