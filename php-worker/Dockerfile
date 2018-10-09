@@ -4,7 +4,7 @@
 #--------------------------------------------------------------------------
 #
 
-FROM laradock/workspace:2.2-72
+FROM laradock/workspace:2.2-7.2
 
 LABEL maintainer="ouranoshong <ouranoshong@outlook.com>"
 
