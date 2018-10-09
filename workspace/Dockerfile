@@ -33,6 +33,16 @@ RUN if [ ${INSTALL_SOAP} = true ]; then \
 ;fi
 
 #####################################
+# APCU:
+#####################################
+ARG INSTALL_APCU=false
+RUN if [ ${INSTALL_APCU} = true ]; then \
+  add-apt-repository -y ppa:ondrej/php && \
+  apt-get update -yqq && \
+  apt-get -y install php7.2-apcu \
+;fi
+
+#####################################
 # Set Timezone
 #####################################
 
@@ -433,15 +443,6 @@ RUN if [ ${INSTALL_SYMFONY} = true ]; then \
   && chmod a+x /usr/local/bin/symfony \
   && echo 'alias dev="php bin/console -e=dev"' >> ~/.bashrc \
   && echo 'alias prod="php bin/console -e=prod"' >> ~/.bashrc \
-;fi
-
-#####################################
-# APCU:
-#####################################
-ARG INSTALL_APCU=false
-RUN if [ ${INSTALL_APCU} = true ]; then \
-    pecl install APCu && \
-    docker-php-ext-enable apcu \
 ;fi
 
 USER dockerWorkspace
