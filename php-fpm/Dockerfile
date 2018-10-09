@@ -10,9 +10,9 @@
 #    https://hub.docker.com/r/laradock/php-fpm/tags/
 #
 
-FROM laradock/php-fpm:2.0-71
+FROM laradock/php-fpm:2.2-7.2
 
-MAINTAINER hong <ouranoshong@outlook.com>
+LABEL mantainer="hong <ouranoshong@outlook.com>"
 
 #
 #--------------------------------------------------------------------------

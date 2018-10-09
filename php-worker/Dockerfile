@@ -4,9 +4,17 @@
 #--------------------------------------------------------------------------
 #
 
-FROM laradock/workspace:2.0-71
+FROM laradock/workspace:2.2-72
 
-MAINTAINER ouranoshong <ouranoshong@outlook.com>
+LABEL maintainer="ouranoshong <ouranoshong@outlook.com>"
+
+#####################################
+# Set Timezone
+#####################################
+
+ARG TZ=UTC
+ENV TZ ${TZ}
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 
 RUN apt-get update -qyy && \
@@ -21,8 +29,8 @@ ARG INSTALL_MONGO=false
 ENV INSTALL_MONGO ${INSTALL_MONGO}
 RUN if [ ${INSTALL_MONGO} = true ]; then \
     pecl install mongodb && \
-    echo "extension=mongodb.so" >> /etc/php/7.1/mods-available/mongodb.ini && \
-    ln -s /etc/php/7.1/mods-available/mongodb.ini /etc/php/7.1/cli/conf.d/30-mongodb.ini \
+    echo "extension=mongodb.so" >> /etc/php/7.2/mods-available/mongodb.ini && \
+    ln -s /etc/php/7.2/mods-available/mongodb.ini /etc/php/7.2/cli/conf.d/30-mongodb.ini \
 ;fi
 
 #

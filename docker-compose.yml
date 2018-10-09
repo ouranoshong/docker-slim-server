@@ -31,9 +31,10 @@ services:
                 - 'NODE_VERSION=${WORKSPACE_NODE_VERSION}'
                 - 'YARN_VERSION=${WORKSPACE_YARN_VERSION}'
                 - 'TZ=${WORKSPACE_TIMEZONE}'
+                - 'INSTALL_APCU={WORKSPACE_INSTALL_APCU}'
                 - 'BLACKFIRE_CLIENT_ID=${BLACKFIRE_CLIENT_ID}'
                 - 'BLACKFIRE_CLIENT_TOKEN=${BLACKFIRE_CLIENT_TOKEN}'
-            dockerfile: 'Dockerfile-${PHP_VERSION}'
+            dockerfile: 'Dockerfile'
         volumes_from:
             - applications
         extra_hosts:
@@ -160,6 +161,7 @@ services:
             context: ./php-worker
             args:
                 - INSTALL_MONGO=${PHPFPM_INSTALL_MONGO}
+                - TZ=${WORKSPACE_TIMEZONE}
             dockerfile: Dockerfile
         networks: 
             - backend

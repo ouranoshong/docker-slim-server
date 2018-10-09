@@ -1,6 +1,6 @@
 FROM nginx:alpine
 
-MAINTAINER hong <ouranoshong@outlook.com>
+LABEL name="hong" email="ouranoshong@outlook.com"
 
 COPY certs/* /etc/nginx/certs/
 COPY nginx.conf /etc/nginx/
